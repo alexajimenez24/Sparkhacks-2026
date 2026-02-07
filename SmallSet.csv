@@ -1,0 +1,3 @@
+Product,Company,HP,RPM,Frame,Voltatge,Amps,Service Factor,Inverter,Efficiency,Efficiency Group,Shaft Dia.,Shaft Length ,Overall Length,Model,Item Num
+Motor,Lesson,`.25,1700,63C,230/460,1.0/.5,1.15,Yes,6800%,IE1,11,23,217,063T17FH5402,26VX23
+Motor,Weg,1.5,1755,90S,460,2.05,1.25,N/A,86.5,IE3,24,50,329,13984005,482V66
