@@ -12,7 +12,7 @@ export default function PromptBox({ onSubmit, loading }) {
         <div>
             <textarea
                 className="w-full p-3 border rounded-lg"
-                placeholder="Ask Llama anything..."
+                placeholder="Ask Grain.AI anything..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
             />

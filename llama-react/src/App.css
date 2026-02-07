@@ -1,42 +1,48 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* 🌌 Dark industrial control room background */
+.industrial-bg {
+  background: radial-gradient(circle at top, #1f2328 0%, #0f1114 60%, #0a0c0f 100%);
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* 🏭 Header panel */
+.header-panel {
+  background: linear-gradient(145deg, #1a1d21, #22262b);
+  border: 1px solid #2f343a;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Accent color (safety yellow) */
+.text-accent {
+  color: #f5c542;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* 🟢 Status badge */
+.status-indicator {
+  background: #1a2a1f;
+  border: 1px solid #2f5e3b;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
 }
 
-.card {
-  padding: 2em;
+/* 💬 Chat panel styled like a system console */
+.chat-panel {
+  background: linear-gradient(145deg, #16191d, #1d2126);
+  border: 1px solid #2a2f36;
+  box-shadow:
+    0 0 25px rgba(0, 0, 0, 0.7),
+    inset 0 0 20px rgba(0, 0, 0, 0.6);
 }
 
-.read-the-docs {
-  color: #888;
+/* Inputs */
+input {
+  background: #0f1317;
+  border: 1px solid #2c323a;
+  color: #1f3c76;
+}
+
+input:focus {
+  outline: none;
+  border-color: #f5c542;
+  box-shadow: 0 0 8px rgba(245, 197, 66, 0.4);
 }
