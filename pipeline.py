@@ -1,36 +1,35 @@
 import os
 import requests
 from typing import List
+from dotenv import load_dotenv
 
-google_api_key= os.getenv("GOOGLE_API_KEY")
-google_cse_id= os.getenv("GOOGLE_CSE_ID")
+load_dotenv()
 
-langchain_api_key= os.getenv("LANGCHAIN_API_KEY")
-LANGCHAIN_TRACING_V2="true"
-LANGCHAIN_PROJECT="grainger-live-search"
+google_api_key = os.getenv("GOOGLE_API_KEY")
+google_cse_id = os.getenv("GOOGLE_CSE_ID")
+langchain_api_key = os.getenv("LANGCHAIN_API_KEY")
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "grainger-live-search"
 
-if not os.environ.get("LANGCHAIN_API_KEY"):
+if not langchain_api_key:
     raise RuntimeError("LANGCHAIN_API_KEY is required for tracing")
-
+if not google_api_key or not google_cse_id:
+    raise RuntimeError("GOOGLE_API_KEY and GOOGLE_CSE_ID are required")
 
 def grainger_live_search(query: str) -> str:
     """
     Perform a live Google search restricted to grainger.com
-    using Google Programmable Search (CSE).
+    using Google Programmable Search (CSE). 
+
+    - Suggest products that may be beneficial.
+    - Provide available product info from Grainger.
+    - If no results, fallback to verifiable sources.
     """
-    api_key = os.environ.get("GOOGLE_API_KEY")
-    cse_id = os.environ.get("GOOGLE_CSE_ID")
-
-    if not api_key or not cse_id:
-        raise RuntimeError("Missing GOOGLE_API_KEY or GOOGLE_CSE_ID")
-
     url = "https://www.googleapis.com/customsearch/v1"
-
     params = {
-        "key": api_key,
-        "cx": cse_id,                     
+        "key": google_api_key,
+        "cx": google_cse_id,
         "q": f"site:grainger.com {query}",
         "num": 5,
     }
@@ -52,52 +51,37 @@ def grainger_live_search(query: str) -> str:
 
     return "\n".join(results)
 
+from langchain.tools import tool
 
-from langchain.tools import Tool
-
-grainger_search_tool = Tool(
-    name="Grainger Live Search",
-    func=grainger_live_search,
-    description=(
-        "Search live Grainger.com pages for products, specs, "
-        "categories, and industrial solutions. "
-        "This tool MUST be used for any Grainger-related question."
-    ),
-)
+@tool
+def grainger_search(query: str) -> str:
+    """
+    Search live Grainger.com pages for products, specs, categories, and industrial solutions.
+    This tool MUST be used for any Grainger-related question.
+    """
+    return grainger_live_search(query)
 
 
 from langchain_google_vertexai import ChatVertexAI
 
 llm = ChatVertexAI(
     model_name="gemini-2.5-flash",
-    temperature=0.0,
+    temperature=0.2,
     max_output_tokens=4096,
 )
-
 
 from langchain.agents import initialize_agent, AgentType
 
 agent = initialize_agent(
-    tools=[grainger_search_tool],
+    tools=[grainger_search],
     llm=llm,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,   
+    verbose=True,
 )
 
 if __name__ == "__main__":
     print("Test\n")
-
-    user_query = (
-        "test"
-    )
-
-    response = agent.run(
-        f"""
-        Test
-        {user_query}
-        """
-    )
-
-    print("\ntest\n")
+    user_query = "test"
+    response = agent.run(user_query)
+    print("\nTest response:\n")
     print(response)
-
