@@ -1,91 +1,103 @@
 import os
+import requests
+from typing import List
 
-google_api_key = os.getenv("GOOGLE_API_KEY")
+google_api_key= os.getenv("GOOGLE_API_KEY")
+google_cse_id= os.getenv("GOOGLE_CSE_ID")
+
+langchain_api_key= os.getenv("LANGCHAIN_API_KEY")
+LANGCHAIN_TRACING_V2="true"
+LANGCHAIN_PROJECT="grainger-live-search"
+
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-langchain_api_key = os.getenv("LANGCHAIN_API_KEY")
+
+if not os.environ.get("LANGCHAIN_API_KEY"):
+    raise RuntimeError("LANGCHAIN_API_KEY is required for tracing")
 
 
-from typing import TypedDict, Dict, Any
+def grainger_live_search(query: str) -> str:
+    """
+    Perform a live Google search restricted to grainger.com
+    using Google Programmable Search (CSE).
+    """
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    cse_id = os.environ.get("GOOGLE_CSE_ID")
 
-from langgraph.graph import StateGraph, END
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+    if not api_key or not cse_id:
+        raise RuntimeError("Missing GOOGLE_API_KEY or GOOGLE_CSE_ID")
+
+    url = "https://www.googleapis.com/customsearch/v1"
+
+    params = {
+        "key": api_key,
+        "cx": cse_id,                     
+        "q": f"site:grainger.com {query}",
+        "num": 5,
+    }
+
+    response = requests.get(url, params=params, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+
+    if "items" not in data:
+        return "No relevant Grainger results found."
+
+    results: List[str] = []
+    for item in data["items"]:
+        results.append(
+            f"Product/Page Title: {item.get('title')}\n"
+            f"Snippet: {item.get('snippet')}\n"
+            f"URL: {item.get('link')}\n"
+        )
+
+    return "\n".join(results)
+
+
+from langchain.tools import Tool
+
+grainger_search_tool = Tool(
+    name="Grainger Live Search",
+    func=grainger_live_search,
+    description=(
+        "Search live Grainger.com pages for products, specs, "
+        "categories, and industrial solutions. "
+        "This tool MUST be used for any Grainger-related question."
+    ),
+)
+
 
 from langchain_google_vertexai import ChatVertexAI
 
-class PipelineState(TypedDict):
-    """
-    Shared state passed through the pipeline.
-    """
-    keys: Dict[str, Any]
+llm = ChatVertexAI(
+    model_name="gemini-2.5-flash",
+    temperature=0.0,
+    max_output_tokens=4096,
+)
 
 
-def get_vertex_llm(
-    model_name: str = "gemini-2.5-flash",
-    temperature: float = 0.2,
-    max_output_tokens: int = 4096
-):
-    """
-    Create a Gemini model hosted on Google AI.
-    """
-    return ChatVertexAI(
-        model_name=model_name,
-        temperature=temperature,
-        max_output_tokens=max_output_tokens,
+from langchain.agents import initialize_agent, AgentType
+
+agent = initialize_agent(
+    tools=[grainger_search_tool],
+    llm=llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True,   
+)
+
+if __name__ == "__main__":
+    print("Test\n")
+
+    user_query = (
+        "test"
     )
 
-def run_llm(state: PipelineState):
-    """
-    Executes the Gemini model on user input.
-    """
-    llm = state["keys"]["llm"]
-    user_input = state["keys"]["input"]
-
-    prompt = ChatPromptTemplate.from_template(
-        """Respond clearly and concisely to the following input. User input will almost always be Grainger Company related. 
-        If user inputs a problem they are having, suggest different Grainger products (with full name) that may solve issue. 
-        If user asks questions about product, first look for answer in the Grainger website listing of product and if no viable answer found, search on reputable forums:
-
-        {input}
+    response = agent.run(
+        f"""
+        Test
+        {user_query}
         """
     )
 
-    chain = prompt | llm | StrOutputParser()
+    print("\ntest\n")
+    print(response)
 
-    response = chain.invoke({"input": user_input})
-
-    return {
-        "keys": {
-            **state["keys"],
-            "llm_output": response
-        }
-    }
-
-pipeline = StateGraph(PipelineState)
-
-pipeline.add_node("run_llm", run_llm)
-pipeline.set_entry_point("run_llm")
-pipeline.add_edge("run_llm", END)
-
-app = pipeline.compile()
-
-print("LangGraph pipeline built successfully.")
-
-if __name__ == "__main__":
-   
-    llm = get_vertex_llm(
-        model_name="gemini-2.5-flash",
-        temperature=0.2
-    )
-
-    inputs = {
-        "keys": {
-            "llm": llm,
-            "input": "Generate a short story about two Grainger tools falling love."
-        }
-    }
-
-    result = app.invoke(inputs)
-
-    print("\nPipeline Generation Test Results\n")
-    print(result["keys"]["llm_output"])
