@@ -1,5 +1,5 @@
 'use client';
-//import { CloseIcon, MenuIcon } from '@/icons/icons';
+import { CloseIcon, MenuIcon } from '@/icons/icons';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -23,7 +23,7 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/" className="flex items-end gap-2">
               <Image
-                src="/images/graingerblack.svg"
+                src="/images/graingerblack.png"
                 className="block dark:hidden"
                 alt="Grainger Logo"
                 width={180}
@@ -31,7 +31,7 @@ export default function Header() {
               />
 
               <Image
-                src="/images/graingerwhite.svg"
+                src="/images/graingerwhite.png"
                 className="hidden dark:block"
                 alt="Grainger Logo"
                 width={180}

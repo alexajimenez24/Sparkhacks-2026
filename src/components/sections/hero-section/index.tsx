@@ -8,7 +8,7 @@ export default function HeroSection() {
           <div className="max-w-[800px] mx-auto">
             <div className="text-center pb-16">
               <h1 className="text-gray-700 mx-auto font-bold mb-4 text-4xl sm:text-[50px] dark:text-white/90 sm:leading-[64px] max-w-[700px]">
-                Use our tool to find the right product for you!
+                Use the Grainger Shopping Assistant to find the right product for you!
               </h1>
               <p className="max-w-[537px] text-center mx-auto dark:text-gray-400 text-gray-500 text-base">
                 Out AI model will search the Granger product library and find products that suit your unique needs.

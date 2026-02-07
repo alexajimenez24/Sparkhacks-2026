@@ -31,7 +31,7 @@ export default function FloatingButton({ href, onClick, label = 'Chatbot',}: Pro
       style={{ position: 'relative' }}
     >
       {/* image from public/images/icon.svg */}
-      <img src="/images/icon.svg" alt={label} className="w-6 h-6 sm:w-8 sm:h-8" />
+      <img src="/images/icon.png" alt={label} className="w-6 h-6 sm:w-8 sm:h-8" />
     </button>
   );
   return (

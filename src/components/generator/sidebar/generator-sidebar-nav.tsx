@@ -9,7 +9,7 @@ const navItems = [
   {
     href: '/text-generator',
     label: 'Grainger Shopping Bot',
-    icon: <img src="/images/icon.svg" alt="Grainger bot" className="w-8 h-8" />,
+    icon: <img src="/images/icon.png" alt="Grainger bot" className="w-8 h-8" />,
   },
 ];
 
